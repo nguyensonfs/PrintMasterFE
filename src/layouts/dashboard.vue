@@ -9,6 +9,4 @@
     </v-main>
   </v-app>
 </template>
-<script setup>
-import NavigationDrawer from '@/components/Layouts/NavigationDrawer'
-</script>
+<script setup></script>

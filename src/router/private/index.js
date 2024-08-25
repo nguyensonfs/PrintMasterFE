@@ -2,7 +2,8 @@ const instance = [
   {
     path: '/departments',
     name: 'departments',
-    component: () => import('@/components/Manager/DepartmentManager'),
+    component: () =>
+      import('@/components/Manager/DepartmentManager/DepartmentManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý phòng ban',
@@ -12,7 +13,8 @@ const instance = [
   {
     path: '/projects',
     name: 'projects',
-    component: () => import('@/components/Manager/ProjectManager'),
+    component: () =>
+      import('@/components/Manager/ProjectManager/ProjectManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý dự án',
@@ -22,7 +24,8 @@ const instance = [
   {
     path: '/employees',
     name: 'employees',
-    component: () => import('@/components/Manager/EmployeeManager'),
+    component: () =>
+      import('@/components/Manager/EmployeeManager/EmployeeManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý nhân viên',
@@ -32,7 +35,8 @@ const instance = [
   {
     path: '/deliveries',
     name: 'deliveries',
-    component: () => import('@/components/Manager/DeliveryManager'),
+    component: () =>
+      import('@/components/Manager/DeliveryManager/DeliveryManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý giao hàng',
@@ -42,7 +46,8 @@ const instance = [
   {
     path: '/customers',
     name: 'customers',
-    component: () => import('@/components/Manager/CustomerManager'),
+    component: () =>
+      import('@/components/Manager/CustomerManager/CustomerManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý khách hàng',
@@ -52,7 +57,8 @@ const instance = [
   {
     path: '/inventories',
     name: 'inventories',
-    component: () => import('@/components/Manager/InventoryManager'),
+    component: () =>
+      import('@/components/Manager/InventoryManager/InventoryManager.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Quản lý kho',
@@ -62,7 +68,7 @@ const instance = [
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: () => import('@/components/DashboardHome'),
+    component: () => import('@/components/DashboardHome/DashboardHome.vue'),
     meta: {
       layout: 'dashboard',
       title: 'Dashboard',

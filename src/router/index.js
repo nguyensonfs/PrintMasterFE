@@ -1,14 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import authRoutes from './public/authRoutes'
-import dashboardRoutes from './private'
 import { useAuthStore } from '@/stores/auth'
+import { createRouter, createWebHistory } from 'vue-router'
+import dashboardRoutes from './private'
+import authRoutes from './public/authRoutes'
 const routes = [
   ...dashboardRoutes,
   ...authRoutes,
   {
     path: '/not-authorized',
     name: 'notAuthorized',
-    component: () => import('@/components/NotAuthorized'),
+    component: () => import('@/components/NotAuthorized/NotAuthorized.vue'),
     meta: {
       title: 'NotAuthorized',
     },
@@ -16,7 +16,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'notfound',
-    component: () => import('@/components/NotFound'),
+    component: () => import('@/components/NotFound/NotFound.vue'),
     meta: {
       title: 'NotFound',
     },
