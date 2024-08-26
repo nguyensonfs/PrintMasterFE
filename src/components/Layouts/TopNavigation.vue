@@ -5,10 +5,14 @@
     image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg"
   >
     <template v-slot:image>
-      <v-img gradient="to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)"></v-img>
+      <v-img
+        gradient="to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)"
+      ></v-img>
     </template>
     <template v-slot:prepend>
-      <v-app-bar-nav-icon @click="drawerStore.toggleDrawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon
+        @click="drawerStore.toggleDrawer"
+      ></v-app-bar-nav-icon>
     </template>
     <v-col cols="auto">
       <v-img
@@ -73,24 +77,24 @@
   </v-app-bar>
 </template>
 <script setup>
-import { useDrawerStore } from "@/stores/drawer";
-import { useAuthStore } from "@/stores/auth";
-const drawerStore = useDrawerStore();
-const authStore = useAuthStore();
-const router = useRouter();
+import { useAuthStore } from '@/stores/auth'
+import { useDrawerStore } from '@/stores/drawer'
+const drawerStore = useDrawerStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
-const isAuthenticated = computed(() => authStore.isAuthenticated);
-const user = computed(() => authStore.getUser);
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+const user = computed(() => authStore.getUser)
 
 const menus = [
-  { title: "Profile", icon: "mdi-account" },
-  { title: "Change Password", icon: "mdi-key" },
-  { title: "Setting", icon: "mdi-cog" },
-  { title: "Logout", icon: "mdi-logout" },
-];
+  { title: 'Profile', icon: 'mdi-account' },
+  { title: 'Change Password', icon: 'mdi-key' },
+  { title: 'Setting', icon: 'mdi-cog' },
+  { title: 'Logout', icon: 'mdi-logout' },
+]
 
 const logout = () => {
-  authStore.logout();
-  router.push({ name: "login" });
-};
+  authStore.logout()
+  router.push({ name: 'login' })
+}
 </script>

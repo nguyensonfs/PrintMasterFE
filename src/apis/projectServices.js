@@ -6,6 +6,10 @@ export const getAllProjectAPI = async () => {
 }
 
 export const createProjectAPI = async (data) => {
-  const response = await axios.post('/projects', data)
+  const response = await axios.post('/projects', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return response
 }
