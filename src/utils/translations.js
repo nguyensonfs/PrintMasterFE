@@ -1,5 +1,5 @@
 export const projectStatusTranslations = {
-  Initialization: 'Đang trong thời gian hoàn thành',
+  Initialization: 'Khởi tạo',
   'In Progress': 'Đang tiến hành',
   Completed: 'Hoàn thành',
   'On Hold': 'Tạm dừng',
