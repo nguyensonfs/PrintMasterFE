@@ -25,6 +25,11 @@ export const changeTeamForUserAPI = async (userId, data) => {
   return response
 }
 
+export const addRoleForUserAPI = async (userId, data) => {
+  const response = await axios.post(`/users/${userId}/roles`, data)
+  return response
+}
+
 export const getEmployeeByIdAPI = async (userId) => {
   const response = await axios.post(`/users/${userId}`)
   return response

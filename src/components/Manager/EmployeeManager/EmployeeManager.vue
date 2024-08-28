@@ -18,10 +18,7 @@
     <v-data-table
       :headers="headers"
       :items="employees"
-      :items-per-page="pagination.itemsPerPage"
-      v-model:page="pagination.page"
       :sort-by="[{ key: 'fullName', order: 'asc' }]"
-      :server-items-length="totalItems"
       v-model:search="search"
     >
       <template v-slot:[`item.avatar`]="{ item }">
@@ -132,11 +129,6 @@ const teams = ref([]);
 const allPermissions = ref([]);
 const userRoles = ref([]);
 const selectedPermissionNames = ref([]);
-const totalItems = ref(0);
-const pagination = ref({
-  page: 1,
-  itemsPerPage: 5,
-});
 
 const formData = ref({
   id: null,
@@ -168,6 +160,8 @@ const openDialog = async (actionMode, item = null) => {
   if (actionMode === "addRole") {
     await getRoles();
     userRoles.value = await getUserRoles(item.id);
+    console.log("Quyền của nhân viên:", userRoles.value);
+    mapUserPermissionsToNames();
   }
   dialogVisible.value = true;
 };
@@ -185,7 +179,11 @@ const setFormData = (item) => {
 };
 
 const mapUserPermissionsToNames = () => {
-  selectedPermissionNames.value = userRoles.value.slice();
+  if (userRoles.value && Array.isArray(userRoles.value)) {
+    selectedPermissionNames.value = userRoles.value.slice();
+  } else {
+    selectedPermissionNames.value = [];
+  }
 };
 
 const updateSelectedPermissions = (newPermissionNames) => {
@@ -208,6 +206,15 @@ const saveChanges = async () => {
       if (index !== -1) {
         departments.value[index] = response.data;
       }
+    }
+    if (mode.value === "addRole") {
+      const payload = selectedPermissionNames.value;
+      const response = await userService.addRoleForUserAPI(formData.value.id, payload);
+      if (response.status === 200) {
+        toast.success(response.message);
+      }
+      const updatedEmployees = await fetchEmployees();
+      employees.value = updatedEmployees;
     }
     dialogVisible.value = false;
   } catch (error) {
@@ -246,31 +253,35 @@ const changeTeam = async () => {
 };
 
 const fetchEmployees = async () => {
-  const responese = await userService.getAllUsersAPI();
-  employees.value = responese;
-  return responese;
+  const response = await userService.getAllUsersAPI();
+  employees.value = response;
+  return response;
 };
 
 const getUserRoles = async (userId) => {
-  const responese = await userService.getRoleUserByIdAPI(userId);
-  userRoles.value = responese;
-  console.log("🚀 ~ getUserRoles ~ userRoles.value:", userRoles.value);
+  const response = await userService.getRoleUserByIdAPI(userId);
+
+  if (response && Array.isArray(response)) {
+    userRoles.value = response;
+  } else {
+    userRoles.value = [];
+  }
+  return response;
 };
 
 const getRoles = async () => {
-  const responese = await roleService.getRolesAPI();
-  allPermissions.value = responese;
+  const response = await roleService.getRolesAPI();
+  allPermissions.value = response;
 };
 
 const fetchTeams = async () => {
-  const responese = await teamService.getTeamAPI();
-  teams.value = responese;
+  const response = await teamService.getTeamAPI();
+  teams.value = response;
 };
 
 onMounted(async () => {
   await fetchEmployees();
   await fetchTeams();
   await getRoles();
-  mapUserPermissionsToNames();
 });
 </script>
