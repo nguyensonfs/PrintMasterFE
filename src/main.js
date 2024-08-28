@@ -1,6 +1,5 @@
 // Plugins
 import { registerPlugins } from '@/plugins'
-import hasPermission from '@/directives/hasPermission'
 
 //Css
 import './assets/css/main.css'
@@ -29,5 +28,4 @@ registerPlugins(app)
 app.component('font-awesome-icon', FontAwesomeIcon)
 const authStore = useAuthStore()
 authStore.autoLogin()
-app.directive('hasPermission', hasPermission)
 app.mount('#app')
