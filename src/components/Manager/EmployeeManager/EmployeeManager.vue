@@ -160,7 +160,6 @@ const openDialog = async (actionMode, item = null) => {
   if (actionMode === "addRole") {
     await getRoles();
     userRoles.value = await getUserRoles(item.id);
-    console.log("Quyền của nhân viên:", userRoles.value);
     mapUserPermissionsToNames();
   }
   dialogVisible.value = true;

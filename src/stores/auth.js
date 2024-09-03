@@ -1,7 +1,6 @@
 import * as AuthServices from '@/apis/authServices'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
-import { roles } from '@/permissions/roles'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -47,7 +46,6 @@ export const useAuthStore = defineStore('auth', {
           this.user = jwtDecode(this.accessToken)
           this.isLoggedIn = true
         } catch (error) {
-          console.log('Invalid token', error)
           this.logout()
         }
       }

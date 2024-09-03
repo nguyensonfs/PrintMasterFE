@@ -15,6 +15,22 @@ const instance = [
     name: 'projects',
     component: () =>
       import('@/components/Manager/ProjectManager/ProjectManager.vue'),
+    children: [
+      {
+        path: ':projectId',
+        name: 'projectDetail',
+        component: () =>
+          import('@/components/Manager/ProjectManager/ProjectView.vue'),
+        props: true,
+      },
+      {
+        path: ':projectId/designs',
+        name: 'designs',
+        component: () =>
+          import('@/components/Manager/ProjectManager/DesignView.vue'),
+        props: true,
+      },
+    ],
     meta: {
       layout: 'dashboard',
       title: 'Quản lý dự án',
