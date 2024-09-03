@@ -1,11 +1,6 @@
 <template>
   <div>
-    <v-btn
-      @click="openDialog"
-      size="small"
-      icon="mdi-plus"
-      color="green"
-    ></v-btn>
+    <v-btn @click="openDialog" size="small" icon="mdi-plus" color="green"></v-btn>
   </div>
   <v-dialog v-model="dialogVisible" max-width="900" min-height="500">
     <v-card class="tw-p-8">
@@ -135,114 +130,109 @@
           @click="createProject"
           text="Thêm mới"
         ></v-btn>
-        <v-btn
-          color="red"
-          variant="outlined"
-          @click="closeDialog"
-          text="Thoát"
-        ></v-btn>
+        <v-btn color="red" variant="outlined" @click="closeDialog" text="Thoát"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup>
-import { useCustomerStore } from '@/stores/customer'
-import { useProjectStore } from '@/stores/project'
-import { useUserStore } from '@/stores/user'
-import VueDatePicker from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
+import { useCustomerStore } from "@/stores/customer";
+import { useProjectStore } from "@/stores/project";
+import { useUserStore } from "@/stores/user";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 
-const dialogVisible = ref(false)
+const dialogVisible = ref(false);
 
-const imageFile = ref(null)
-const imagePreview = ref(null)
-const projectName = ref('')
-const description = ref('')
-const requestDescriptionFromCustomer = ref('')
-const commissionPercentage = ref(null)
-const startingPrice = ref(null)
-const customerId = ref(null)
-const leaderId = ref(null)
-const expectedEndDate = ref(null)
+const imageFile = ref(null);
+const imagePreview = ref(null);
+const projectName = ref("");
+const description = ref("");
+const requestDescriptionFromCustomer = ref("");
+const commissionPercentage = ref(null);
+const startingPrice = ref(null);
+const customerId = ref(null);
+const leaderId = ref(null);
+const expectedEndDate = ref(null);
 
-const dateFormat = 'yyyy-MM-dd'
+const dateFormat = "yyyy-MM-dd";
 
-const toast = useToast()
-const projectStore = useProjectStore()
-const customerStore = useCustomerStore()
-const userStore = useUserStore()
+const toast = useToast();
+const projectStore = useProjectStore();
+const customerStore = useCustomerStore();
+const userStore = useUserStore();
+const projects = computed(() => projectStore.getProject);
 
 const openDialog = async () => {
-  dialogVisible.value = true
-}
+  dialogVisible.value = true;
+};
 
 const closeDialog = () => {
-  dialogVisible.value = false
-  clearData()
-}
+  dialogVisible.value = false;
+  clearData();
+};
 
 const previewImage = () => {
-  const file = imageFile.value
+  const file = imageFile.value;
   if (file) {
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (e) => {
-      imagePreview.value = e.target.result
-    }
-    reader.readAsDataURL(file)
+      imagePreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
-}
+};
 
 const createProject = async () => {
-  const formData = new FormData()
-  formData.append('projectName', projectName.value)
-  formData.append('description', description.value)
+  const formData = new FormData();
+  formData.append("projectName", projectName.value);
+  formData.append("description", description.value);
+  formData.append("requestDescriptionFromCustomer", requestDescriptionFromCustomer.value);
+  formData.append("commissionPercentage", commissionPercentage.value);
+  formData.append("startingPrice", startingPrice.value);
+  formData.append("customerId", customerId.value);
+  formData.append("leaderId", leaderId.value);
   formData.append(
-    'requestDescriptionFromCustomer',
-    requestDescriptionFromCustomer.value
-  )
-  formData.append('commissionPercentage', commissionPercentage.value)
-  formData.append('startingPrice', startingPrice.value)
-  formData.append('customerId', customerId.value)
-  formData.append('leaderId', leaderId.value)
-  formData.append(
-    'expectedEndDate',
+    "expectedEndDate",
     expectedEndDate.value ? expectedEndDate.value.toISOString() : null
-  )
+  );
 
   if (imageFile.value) {
-    formData.append('imageDescription', imageFile.value)
+    formData.append("imageDescription", imageFile.value);
   }
-  const response = await projectStore.createProject(formData)
+  const response = await projectStore.createProject(formData);
+  console.log("🚀 ~ createProject ~ response:", response);
   if (response.status === 200) {
-    toast.success('Dự án đã được tạo thành công!')
+    toast.success("Dự án đã được tạo thành công!");
+    projects.value.push(response.data);
   }
-}
+};
 
 const triggerFileInput = () => {
-  document.querySelector('input[type="file"]').click()
-}
+  document.querySelector('input[type="file"]').click();
+};
 
 const clearImage = () => {
-  imageFile.value = null
-  imagePreview.value = null
-}
+  imageFile.value = null;
+  imagePreview.value = null;
+};
 
 const clearData = () => {
-  imageFile.value = null
-  imagePreview.value = null
-  projectName.value = ''
-  description.value = ''
-  requestDescriptionFromCustomer.value = ''
-  commissionPercentage.value = ''
-  startingPrice.value = ''
-  customerId.value = ''
-  leaderId.value = ''
-  expectedEndDate.value = ''
-}
+  imageFile.value = null;
+  imagePreview.value = null;
+  projectName.value = "";
+  description.value = "";
+  requestDescriptionFromCustomer.value = "";
+  commissionPercentage.value = "";
+  startingPrice.value = "";
+  customerId.value = "";
+  leaderId.value = "";
+  expectedEndDate.value = "";
+};
 
 onMounted(() => {
-  customerStore.fetchAllCustomers()
-  userStore.fetchAllLeaders()
-})
+  customerStore.fetchAllCustomers();
+  userStore.fetchAllLeaders();
+});
 </script>
