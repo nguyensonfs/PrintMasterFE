@@ -27,7 +27,7 @@ const instance = [
         path: ':projectId/designs',
         name: 'designs',
         component: () =>
-          import('@/components/Manager/ProjectManager/DesignView.vue'),
+          import('@/components/Manager/ProjectManager/ProjectDesignView.vue'),
         props: true,
       },
     ],
