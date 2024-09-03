@@ -30,6 +30,20 @@ const instance = [
           import('@/components/Manager/ProjectManager/ProjectDesignView.vue'),
         props: true,
       },
+      {
+        path: ':projectId/print',
+        name: 'print',
+        component: () =>
+          import('@/components/Manager/ProjectManager/ProjectPrintView.vue'),
+        props: true,
+      },
+      {
+        path: ':projectId/delivery',
+        name: 'delivery',
+        component: () =>
+          import('@/components/Manager/ProjectManager/ProjectDeliveryView.vue'),
+        props: true,
+      },
     ],
     meta: {
       layout: 'dashboard',

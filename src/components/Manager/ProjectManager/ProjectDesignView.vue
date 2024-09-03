@@ -105,19 +105,32 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-snackbar
+    rounded="pill"
+    v-model="snackbar.visible"
+    :color="snackbar.color"
+    timeout="3000"
+  >
+    {{ snackbar.message }}
+    <template v-slot:actions>
+      <v-btn color="red" variant="text" @click="snackbar.visible = false"> Close </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
 <script setup>
 import { useProjectStore } from "@/stores/project";
+import { useProjectProcessStore } from "@/stores/projectProcess";
 import { FILE_URL } from "@/constants";
 import dayjs from "dayjs";
 const props = defineProps({
   projectId: String,
 });
-const toast = useToast();
+const projectProcess = useProjectProcessStore();
 const projectStore = useProjectStore();
 const project = computed(() => projectStore.getProjectById(props.projectId));
 const designs = computed(() => projectStore.getProjectDesigns(props.projectId));
+const router = useRouter();
 
 const isOpen = ref(false);
 const designApproval = ref("");
@@ -126,6 +139,11 @@ const actions = ref([
   { text: "Phê duyệt", value: "Agree" },
   { text: "Không phê duyệt", value: "Refuse" },
 ]);
+const snackbar = ref({
+  visible: false,
+  message: "",
+  color: "error",
+});
 
 const imageFile = ref(null);
 const selectedDesign = ref(null);
@@ -144,17 +162,29 @@ const createDesign = async () => {
     const response = await projectStore.createProjectDesign(props.projectId, formData);
 
     if (response.status === 200) {
-      toast.success(response.message);
+      snackbar.value = {
+        visible: true,
+        message: response.message,
+        color: "success",
+      };
       designs.value.push(response.data);
     }
   } catch (error) {
-    toast.error("Đã xảy ra lỗi trong quá trình tạo thiết kế.");
+    snackbar.value = {
+      visible: true,
+      message: "Đã xảy ra lỗi trong quá trình tạo thiết kế.",
+      color: "error",
+    };
   }
 };
 
 const handleApproval = async () => {
   if (!selectedDesign.value || !designApproval.value) {
-    toast.error("Vui lòng chọn thiết kế và trạng thái phê duyệt.");
+    snackbar.value = {
+      visible: true,
+      message: "Vui lòng chọn thiết kế và trạng thái phê duyệt.",
+      color: "error",
+    };
     return;
   }
 
@@ -171,7 +201,11 @@ const handleApproval = async () => {
     );
 
     if (response.status === 200) {
-      toast.success(response.message);
+      snackbar.value = {
+        visible: true,
+        message: response.message,
+        color: "success",
+      };
 
       designs.value.forEach((design) => {
         if (design.id === selectedDesign.value) {
@@ -180,12 +214,26 @@ const handleApproval = async () => {
           design.designStatus = "Refused";
         }
       });
+
+      if (status === "Agree") {
+        markStepAsCompleted(2);
+        router.push({ name: "print", params: { projectId: props.projectId } });
+        projectProcess.setActiveStep(3);
+      }
     }
   } catch (error) {
-    toast.error("Đã xảy ra lỗi trong quá trình phê duyệt thiết kế.");
+    snackbar.value = {
+      visible: true,
+      message: "Đã xảy ra lỗi trong quá trình phê duyệt thiết kế.",
+      color: "error",
+    };
   } finally {
     deselectDesign();
   }
+};
+
+const markStepAsCompleted = (stepId) => {
+  projectProcess.completeStep(stepId);
 };
 
 const selectDesign = (design) => {

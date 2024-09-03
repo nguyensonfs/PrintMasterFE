@@ -38,7 +38,7 @@
             base-color="primary"
             icon="mdi-eye-outline"
             size="small"
-            @click="openDialog(project)"
+            @click="handleProjectClick(project)"
           ></v-btn>
         </template>
       </v-card>
@@ -56,34 +56,44 @@
       </v-toolbar>
       <!-- Nội dung Dialog -->
       <v-container>
-        <v-row>
-          <v-breadcrumbs class="tw-justify-center tw-items-center tw-h-[60px] tw-mx-auto">
-            <v-breadcrumbs-item v-for="(item, index) in items" :key="index">
-              <router-link
-                :to="getItemUrl(item)"
-                cols="auto"
-                class="tw-h-[60px]"
-                exact-active-class="tw-font-bold tw-text-blue-600 tw-border-blue-600"
-              >
+        <v-row class="tw-justify-center tw-items-center tw-h-[60px]">
+          <v-col
+            cols="auto"
+            class="tw-flex tw-items-center"
+            v-for="(step, index) in steps"
+            :key="step.id"
+            :class="{
+              'active-step': step.active,
+              'completed-step': step.completed && !step.active,
+            }"
+          >
+            <v-btn
+              class="tw-px-2 tw-py-1"
+              :class="{
+                'active-step': step.active,
+                'completed-step': step.completed && !step.active,
+              }"
+              @click="handleStepClick(step.id)"
+              tile
+              flat
+              text
+            >
+              <div class="tw-flex tw-items-center">
                 <v-img
                   width="30"
                   height="30"
-                  :src="`${item.imgUrl}`"
+                  :src="`${step.imgUrl}`"
                   class="tw-mx-auto"
-                  :class="{
-                    'tw-fill-current tw-text-blue-600': isActive(item),
-                    'tw-fill-current tw-text-gray-500': !isActive(item),
-                  }"
                 ></v-img>
-                <span>{{ item.title }}</span>
-              </router-link>
-              <template v-if="index < items.length - 1">
-                <v-breadcrumbs-divider>
-                  <v-icon icon="mdi-chevron-right"></v-icon>
-                </v-breadcrumbs-divider>
-              </template>
-            </v-breadcrumbs-item>
-          </v-breadcrumbs>
+                <span class="tw-ml-2 tw-capitalize">{{ step.name }}</span>
+              </div>
+            </v-btn>
+            <v-icon
+              class="tw-ml-2"
+              v-if="index < steps.length - 1"
+              icon="mdi-chevron-right"
+            ></v-icon>
+          </v-col>
         </v-row>
       </v-container>
       <v-divider
@@ -97,75 +107,77 @@
       </v-container>
     </v-card>
   </v-dialog>
+  <v-snackbar
+    rounded="pill"
+    v-model="snackbar.visible"
+    :color="snackbar.color"
+    timeout="2000"
+  >
+    {{ snackbar.message }}
+    <template v-slot:actions>
+      <v-btn color="red" variant="text" @click="snackbar.visible = false"> Close </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 <script setup>
 import { FILE_URL } from "@/constants";
 import { useProjectStore } from "@/stores/project";
+import { useProjectProcessStore } from "@/stores/projectProcess";
 import { projectStatusTranslations } from "@/utils/translations";
 import "@vuepic/vue-datepicker/dist/main.css";
 import dayjs from "dayjs";
-import { onMounted } from "vue";
-const activeItems = ref([]);
 
-const toast = useToast();
 const projectStore = useProjectStore();
+const projectProcess = useProjectProcessStore();
 const router = useRouter();
-const route = useRoute();
 
 // variable
 const projects = computed(() => projectStore.getProject);
+const steps = computed(() => projectProcess.getSteps);
 const dialogVisible = ref(false);
 const formData = ref(null);
+const snackbar = ref({
+  visible: false,
+  message: "",
+  color: "error",
+});
 
-const items = [
-  {
-    imgUrl: "/src/assets/icons/project.svg",
-    title: "Dự án",
-    url: { name: "projectDetail" },
-  },
-  {
-    imgUrl: "/src/assets/icons/design.svg",
-    title: "Thiết kế",
-    url: { name: "designs" },
-  },
-  // {
-  //   imgUrl: '/src/assets/icons/print.svg',
-  //   title: 'In ấn',
-  //   url: { name: 'projectDetail' },
-  // },
-  // {
-  //   imgUrl: '/src/assets/icons/delivery.svg',
-  //   title: 'Giao hàng',
-  //   url: { name: 'projectDetail' },
-  // },
-];
-
-const getItemUrl = (item) => {
-  if (item.title === "Dự án" && formData.value) {
-    return { name: "projectDetail", params: { projectId: formData.value.id } };
-  }
-  if (item.title === "Thiết kế" && formData.value) {
-    return { name: "designs", params: { projectId: formData.value.id } };
-  }
-  return item.url;
+const handleProjectClick = (project) => {
+  projectProcess.setActiveStep(1);
+  openDialog(project);
 };
 
-const isActive = (item) => {
-  const { name, params } = getItemUrl(item);
-  const active =
-    route.name === name && JSON.stringify(route.params) === JSON.stringify(params);
-  return active;
+const handleStepClick = (stepId) => {
+  projectProcess.setActiveStep(stepId);
+  switch (stepId) {
+    case 1:
+      router.push({
+        name: "projectDetail",
+        params: { projectId: formData.value.id },
+      });
+      break;
+    case 2:
+      router.push({ name: "designs", params: { projectId: formData.value.id } });
+      break;
+    case 3:
+      router.push({ name: "print", params: { projectId: formData.value.id } });
+      break;
+    case 4:
+      router.push({
+        name: "delivery",
+        params: { projectId: formData.value.id },
+      });
+      break;
+    default:
+      console.error("Unknown step id:", stepId);
+  }
 };
 
 // computed
 const openDialog = async (item = null) => {
   dialogVisible.value = true;
   formData.value = item;
-
   router.push({ name: "projectDetail", params: { projectId: item.id } });
-  if (item) {
-    activeItems.value = items.map((i) => (isActive(i) ? i.title : null)).filter(Boolean);
-  }
 };
 
 const closeDialog = async () => {
@@ -186,3 +198,12 @@ onMounted(() => {
   projectStore.fetchAllProject();
 });
 </script>
+<style scoped>
+.active-step {
+  color: #4caf50;
+}
+
+.completed-step {
+  color: #0d31e0;
+}
+</style>

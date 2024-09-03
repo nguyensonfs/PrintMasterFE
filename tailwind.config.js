@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         montserrat: ['Montserrat', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
         sacramento: ['Sacramento', 'cursive'],
       },
       backgroundImage: {

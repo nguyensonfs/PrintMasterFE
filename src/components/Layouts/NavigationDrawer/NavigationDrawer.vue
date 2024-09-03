@@ -18,11 +18,11 @@
     <v-slide-x-reverse-transition>
       <v-list>
         <v-list-item
-          v-for="[icon, text, url] in links"
-          :key="icon"
-          :prepend-icon="icon"
-          :title="text"
-          :to="url"
+          v-for="(item, index) in sidebar"
+          :key="index"
+          :prepend-icon="item.icon"
+          :title="item.title"
+          :to="item.url"
           link
         ></v-list-item>
       </v-list>
@@ -33,22 +33,14 @@
 import { storeToRefs } from "pinia";
 import { useDrawerStore } from "@/stores/drawer";
 import { useAuthStore } from "@/stores/auth";
+import { useSidebarStore } from "@/stores/sidebar";
 
 const drawerStore = useDrawerStore();
+const sidebarStore = useSidebarStore();
 const authStore = useAuthStore();
-const router = useRouter();
 
 const { isOpen } = storeToRefs(drawerStore);
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-
-const links = [
-  ["mdi-view-dashboard", "Dashboard", "/dashboard"],
-  ["mdi-home", "Trang chủ", "/dashboard"],
-  ["mdi-warehouse", "Quản lý kho", "/inventories"],
-  ["mdi-delete", "Quản lý giao hàng", "/deliveries"],
-  ["mdi-image", "Quản lý dự án", "/projects"],
-  ["mdi-account-tie", "Quản lý nhân viên", "/employees"],
-  ["mdi-account-multiple", "Quản lý khách hàng", "/customers"],
-  ["mdi-domain", "Quản lý phòng ban", "/departments"],
-];
+const userRoles = computed(() => authStore.getUserPermissions);
+const sidebar = computed(() => sidebarStore.getAccessibleItems(userRoles.value));
 </script>
