@@ -3,6 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import dashboardRoutes from './private'
 import authRoutes from './public/authRoutes'
 const routes = [
+  {
+    path: '/',
+    redirect: '/dashboard',
+  },
   ...dashboardRoutes,
   ...authRoutes,
   {
