@@ -12,7 +12,11 @@
   <v-row v-else class="tw-mt-[10px]">
     <v-col v-for="project in projects" :key="project.id" cols="12" md="3">
       <v-card>
-        <v-img height="200" :src="`${FILE_URL}${project.imageDescription}`" cover></v-img>
+        <v-img
+          height="200"
+          :src="`${FILE_URL}${project.imageDescription}`"
+          cover
+        ></v-img>
         <v-card-title>
           {{ project.projectName }}
         </v-card-title>
@@ -45,7 +49,11 @@
     </v-col>
   </v-row>
   <!-- Dynamic Dialog -->
-  <v-dialog v-model="dialogVisible" transition="dialog-bottom-transition" fullscreen>
+  <v-dialog
+    v-model="dialogVisible"
+    transition="dialog-bottom-transition"
+    fullscreen
+  >
     <v-card>
       <v-toolbar :height="40">
         <v-toolbar-title>{{ formData?.projectName }}</v-toolbar-title>
@@ -63,33 +71,40 @@
             v-for="(step, index) in steps"
             :key="step.id"
             :class="{
-              'active-step': step.active,
-              'completed-step': step.completed && !step.active,
+              'tw-text-[#4caf50]': step.active,
+              'tw-text-[#0d31e0]': step.completed && !step.active,
             }"
           >
             <v-btn
               class="tw-px-2 tw-py-1"
               :class="{
-                'active-step': step.active,
-                'completed-step': step.completed && !step.active,
+                'tw-text-[#4caf50]': step.active,
+                'tw-text-[#0d31e0]': step.completed && !step.active,
               }"
               @click="handleStepClick(step.id)"
               tile
               flat
               text
             >
-              <div class="tw-flex tw-items-center">
+              <div class="tw-flex tw-items-center tw-flex-col">
                 <v-img
                   width="30"
                   height="30"
                   :src="`${step.imgUrl}`"
                   class="tw-mx-auto"
                 ></v-img>
-                <span class="tw-ml-2 tw-capitalize">{{ step.name }}</span>
+
+                <span class="tw-m-auto tw-mt-1 tw-capitalize">{{
+                  step.name
+                }}</span>
               </div>
             </v-btn>
             <v-icon
               class="tw-ml-2"
+              :class="{
+                'tw-text-gray-400': !step.completed,
+                'tw-text-[#0d31e0]': step.completed && !step.active,
+              }"
               v-if="index < steps.length - 1"
               icon="mdi-chevron-right"
             ></v-icon>
@@ -115,95 +130,88 @@
   >
     {{ snackbar.message }}
     <template v-slot:actions>
-      <v-btn color="red" variant="text" @click="snackbar.visible = false"> Close </v-btn>
+      <v-btn color="red" variant="text" @click="snackbar.visible = false">
+        Close
+      </v-btn>
     </template>
   </v-snackbar>
 </template>
 <script setup>
-import { FILE_URL } from "@/constants";
-import { useProjectStore } from "@/stores/project";
-import { useProjectProcessStore } from "@/stores/projectProcess";
-import { projectStatusTranslations } from "@/utils/translations";
-import "@vuepic/vue-datepicker/dist/main.css";
-import dayjs from "dayjs";
+import { FILE_URL } from '@/constants'
+import { useProjectStore } from '@/stores/project'
+import { useProjectProcessStore } from '@/stores/projectProcess'
+import { projectStatusTranslations } from '@/utils/translations'
+import '@vuepic/vue-datepicker/dist/main.css'
+import dayjs from 'dayjs'
 
-const projectStore = useProjectStore();
-const projectProcess = useProjectProcessStore();
-const router = useRouter();
+const projectStore = useProjectStore()
+const projectProcess = useProjectProcessStore()
+const router = useRouter()
 
 // variable
-const projects = computed(() => projectStore.getProject);
-const steps = computed(() => projectProcess.getSteps);
-const dialogVisible = ref(false);
-const formData = ref(null);
+const projects = computed(() => projectStore.getProject)
+const steps = computed(() => projectProcess.getSteps)
+const dialogVisible = ref(false)
+const formData = ref(null)
 const snackbar = ref({
   visible: false,
-  message: "",
-  color: "error",
-});
+  message: '',
+  color: 'error',
+})
 
 const handleProjectClick = (project) => {
-  projectProcess.setActiveStep(1);
-  openDialog(project);
-};
+  projectProcess.setActiveStep(1)
+  openDialog(project)
+}
 
 const handleStepClick = (stepId) => {
-  projectProcess.setActiveStep(stepId);
+  projectProcess.setActiveStep(stepId)
   switch (stepId) {
     case 1:
       router.push({
-        name: "projectDetail",
+        name: 'projectDetail',
         params: { projectId: formData.value.id },
-      });
-      break;
+      })
+      break
     case 2:
-      router.push({ name: "designs", params: { projectId: formData.value.id } });
-      break;
+      router.push({ name: 'designs', params: { projectId: formData.value.id } })
+      break
     case 3:
-      router.push({ name: "print", params: { projectId: formData.value.id } });
-      break;
+      router.push({ name: 'print', params: { projectId: formData.value.id } })
+      break
     case 4:
       router.push({
-        name: "delivery",
+        name: 'delivery',
         params: { projectId: formData.value.id },
-      });
-      break;
+      })
+      break
     default:
-      console.error("Unknown step id:", stepId);
+      console.error('Unknown step id:', stepId)
   }
-};
+}
 
 // computed
 const openDialog = async (item = null) => {
-  dialogVisible.value = true;
-  formData.value = item;
-  router.push({ name: "projectDetail", params: { projectId: item.id } });
-};
+  dialogVisible.value = true
+  formData.value = item
+  router.push({ name: 'projectDetail', params: { projectId: item.id } })
+}
 
 const closeDialog = async () => {
-  router.push({ name: "projects" });
-  dialogVisible.value = false;
-};
+  router.push({ name: 'projects' })
+  dialogVisible.value = false
+}
 
 const formatDate = (date) => {
-  return date ? dayjs(date).format("DD/MM/YYYY") : "Không có ngày";
-};
+  return date ? dayjs(date).format('DD/MM/YYYY') : 'Không có ngày'
+}
 
 const translateStatus = (status) => {
-  return projectStatusTranslations[status] || status;
-};
+  return projectStatusTranslations[status] || status
+}
 
 // onMounted
 onMounted(() => {
-  projectStore.fetchAllProject();
-});
+  projectStore.fetchAllProject()
+})
 </script>
-<style scoped>
-.active-step {
-  color: #4caf50;
-}
-
-.completed-step {
-  color: #0d31e0;
-}
-</style>
