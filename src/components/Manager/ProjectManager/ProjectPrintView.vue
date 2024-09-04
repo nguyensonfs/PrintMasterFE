@@ -23,7 +23,16 @@
         readonly
       ></v-text-field>
       <div class="text-subtitle-1 text-medium-emphasis">Loại máy móc</div>
-      <v-select density="compact" variant="outlined" color="primary"> </v-select>
+      <v-select
+        density="compact"
+        color="primary"
+        :items="resourceDetails"
+        item-title="name"
+        item-value="id"
+        variant="outlined"
+        v-model="selectedResourceId"
+        placeholder="Chọn loại máy móc"
+      ></v-select>
     </v-col>
     <v-col>
       <div class="text-subtitle-1 text-medium-emphasis">Tên đơn hàng</div>
@@ -50,22 +59,27 @@
     </v-col>
     <v-col>
       <v-card class="tw-p-2">
-        <v-card-title class="tw-pl-0 tw-text-[16px]">Thông tin dự án</v-card-title>
+        <v-card-title class="tw-pl-0 tw-text-[16px]"
+          >Thông tin dự án</v-card-title
+        >
         <v-img
           min-height="200px"
           width="200px"
           :src="`${FILE_URL}${approvedDesign.designImage}`"
         ></v-img>
         <v-card-text class="tw-flex tw-justify-between"
-          ><span>Giá dự án: </span><span>{{ project.startingPrice }}đ</span></v-card-text
+          ><span>Giá dự án: </span
+          ><span>{{ project.startingPrice }}đ</span></v-card-text
         >
         <v-card-text class="tw-flex tw-justify-between tw-pt-0"
-          ><span>Tên dự án: </span><span>{{ project.projectName }}</span></v-card-text
+          ><span>Tên dự án: </span
+          ><span>{{ project.projectName }}</span></v-card-text
         >
       </v-card>
       <v-card class="tw-p-2">
         <v-card-text class="tw-flex tw-justify-between"
-          ><span>Thành tiền: </span><span>{{ project.startingPrice }}đ</span></v-card-text
+          ><span>Thành tiền: </span
+          ><span>{{ project.startingPrice }}đ</span></v-card-text
         >
         <v-card-actions>
           <v-btn color="white" block class="tw-capitalize tw-bg-violet-500"
@@ -83,37 +97,50 @@
   >
     {{ snackbar.message }}
     <template v-slot:actions>
-      <v-btn color="red" variant="text" @click="snackbar.visible = false"> Close </v-btn>
+      <v-btn color="red" variant="text" @click="snackbar.visible = false">
+        Close
+      </v-btn>
     </template>
   </v-snackbar>
 </template>
 <script setup>
-import { useProjectStore } from "@/stores/project";
-import { useProjectProcessStore } from "@/stores/projectProcess";
-import dayjs from "dayjs";
-import { FILE_URL } from "@/constants";
+import { useProjectStore } from '@/stores/project'
+import { useResourceStore } from '@/stores/resource'
+import dayjs from 'dayjs'
+import { FILE_URL } from '@/constants'
 
 const props = defineProps({
   projectId: String,
-});
+})
 
-const projectProcess = useProjectProcessStore();
-const projectStore = useProjectStore();
+const projectStore = useProjectStore()
+const resourceStore = useResourceStore()
 
-const project = computed(() => projectStore.getProjectById(props.projectId));
-const designs = computed(() => projectStore.getProjectDesigns(props.projectId));
+const project = computed(() => projectStore.getProjectById(props.projectId))
+const designs = computed(() => projectStore.getProjectDesigns(props.projectId))
+const resourceDetails = computed(() => {
+  return resourceStore.getResourceDetails
+})
+
+const selectedResourceId = ref(null)
 
 const snackbar = ref({
   visible: false,
-  message: "",
-  color: "error",
-});
+  message: '',
+  color: 'error',
+})
 
 const formatDate = (date) => {
-  return date ? dayjs(date).format("DD/MM/YYYY") : "Không có ngày";
-};
+  return date ? dayjs(date).format('DD/MM/YYYY') : 'Không có ngày'
+}
 
 const approvedDesign = computed(() => {
-  return designs.value.find((design) => design.designStatus === "HasBeenApproved");
-});
+  return designs.value.find(
+    (design) => design.designStatus === 'HasBeenApproved'
+  )
+})
+
+onMounted(async () => {
+  await resourceStore.fetchResourceDetailsByName('Machinery')
+})
 </script>
