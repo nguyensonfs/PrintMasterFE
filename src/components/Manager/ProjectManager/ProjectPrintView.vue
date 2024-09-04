@@ -56,6 +56,38 @@
         :value="formatDate(project.startDate)"
         color="primary"
       ></v-text-field>
+      <v-table class="tw-mt-3" fixed-header height="260px">
+        <thead>
+          <tr>
+            <th class="text-left">Tài nguyên</th>
+            <th class="tw-text-center">Số lượng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in resourceConsumable" :key="item.id">
+            <td>{{ item.name }}</td>
+            <td class="tw-text-center">
+              <v-btn
+                size="small"
+                color="primary"
+                class="tw-p-0"
+                @click="decreaseQuantity(index)"
+              >
+                <v-icon>mdi-minus</v-icon>
+              </v-btn>
+              <span class="tw-mx-2 tw-text-center">{{ item.quantity }}</span>
+              <v-btn
+                size="small"
+                color="primary"
+                class="tw-p-0"
+                @click="increaseQuantity(index)"
+              >
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
     </v-col>
     <v-col>
       <v-card class="tw-p-2">
@@ -82,7 +114,11 @@
           ><span>{{ project.startingPrice }}đ</span></v-card-text
         >
         <v-card-actions>
-          <v-btn color="white" block class="tw-capitalize tw-bg-violet-500"
+          <v-btn
+            color="white"
+            @click="sendPrintJob"
+            block
+            class="tw-capitalize tw-bg-violet-500"
             >Bắt đầu in</v-btn
           >
         </v-card-actions>
@@ -105,6 +141,8 @@
 </template>
 <script setup>
 import { useProjectStore } from '@/stores/project'
+import { getResourcesByNameAPI } from '@/apis/resourceServices'
+import { createPrintJobsAPI } from '@/apis/printJobServices'
 import { useResourceStore } from '@/stores/resource'
 import dayjs from 'dayjs'
 import { FILE_URL } from '@/constants'
@@ -123,6 +161,7 @@ const resourceDetails = computed(() => {
 })
 
 const selectedResourceId = ref(null)
+const resourceConsumable = ref([])
 
 const snackbar = ref({
   visible: false,
@@ -140,7 +179,71 @@ const approvedDesign = computed(() => {
   )
 })
 
+const getResourceConsumable = async (resourceName) => {
+  const response = await getResourcesByNameAPI(resourceName)
+  if (response) {
+    const filteredResources = response.filter(
+      (resource) => resource.resourceName === resourceName
+    )
+
+    resourceConsumable.value = filteredResources.flatMap((resource) =>
+      resource.resourceProperties.flatMap((property) =>
+        property.resourcePropertyDetails.map((detail) => ({
+          ...detail,
+          quantity: 1,
+        }))
+      )
+    )
+    return resourceConsumable.value
+  }
+  return []
+}
+
+const sendPrintJob = async () => {
+  try {
+    const requestData = {
+      designId: approvedDesign.value.id,
+      resourceForPrints: [
+        ...resourceConsumable.value.map((item) => ({
+          resourcePropertyDetailId: item.id,
+          quantity: item.quantity,
+        })),
+        {
+          resourcePropertyDetailId: selectedResourceId.value,
+          quantity: 1,
+        },
+      ],
+    }
+
+    const response = await createPrintJobsAPI(requestData)
+
+    snackbar.value = {
+      visible: true,
+      message: response.message,
+      color: 'success',
+    }
+  } catch (error) {
+    snackbar.value = {
+      visible: true,
+      message: 'Lỗi khi gửi công việc in.',
+      color: 'error',
+    }
+    console.error('Error posting print job:', error)
+  }
+}
+
+const increaseQuantity = (index) => {
+  resourceConsumable.value[index].quantity++
+}
+
+const decreaseQuantity = (index) => {
+  if (resourceConsumable.value[index].quantity > 1) {
+    resourceConsumable.value[index].quantity--
+  }
+}
+
 onMounted(async () => {
   await resourceStore.fetchResourceDetailsByName('Machinery')
+  getResourceConsumable('Office supplies')
 })
 </script>
