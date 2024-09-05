@@ -25,71 +25,25 @@ request.interceptors.request.use(
 )
 
 request.interceptors.response.use(
-  function (response) {
+  (response) => {
     return response.data
   },
-  function (error) {
+  (error) => {
     let res = {}
     if (error.response) {
       res.data = error.response.data
       res.status = error.response.status
       res.headers = error.response.headers
-
-      switch (res.status) {
-        case 400:
-          if (res.data.message) {
-            toast.error(res.data.message)
-          }
-          if (res.data.title) {
-            toast.error(res.data.title)
-          }
-          break
-        case 401:
-          if (res.data.message) {
-            toast.error(res.data.message)
-          }
-          if (res.data.title) {
-            toast.error(res.data.title)
-          }
-          break
-        case 403:
-          if (res.data.message) {
-            toast.error(res.data.message)
-          }
-          if (res.data.title) {
-            toast.error(res.data.title)
-          }
-          break
-        case 404:
-          if (res.data.message) {
-            toast.error(res.data.message)
-          }
-          if (res.data.title) {
-            toast.error(res.data.title)
-          }
-          break
-        case 500:
-          if (res.data.message) {
-            toast.error(res.data.message)
-          }
-          if (res.data.title) {
-            toast.error(res.data.title)
-          }
-          break
-        default:
-          toast.error(`Lỗi ${res.status}: ${res.data.message}`)
-          break
-      }
     } else if (error.request) {
-      toast.error('Không nhận được phản hồi từ server.')
+      res.message = 'Không nhận được phản hồi từ server.'
     } else {
-      toast.error('Có lỗi xảy ra: ' + error.message)
+      res.message = 'Có lỗi xảy ra: ' + error.message
     }
-    return res
+    return Promise.reject(res)
   }
 )
 
-export const get = async (path, data, options = {}) => {
+export const get = async (path, options = {}) => {
   const response = await request.get(path, options)
   return response
 }
@@ -106,7 +60,7 @@ export const patch = async (path, data, options = {}) => {
   const response = await request.patch(path, data, options)
   return response
 }
-export const del = async (path, data, options = {}) => {
+export const del = async (path, options = {}) => {
   const response = await request.delete(path, options)
   return response
 }
