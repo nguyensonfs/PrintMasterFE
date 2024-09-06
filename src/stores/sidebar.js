@@ -8,13 +8,13 @@ export const useSidebarStore = defineStore('sidebar', {
         icon: 'mdi-warehouse',
         title: 'Quản lý kho',
         url: '/inventories',
-        roles: [],
+        roles: ['Admin', 'Leader', 'Manager'],
       },
       {
         icon: 'mdi-truck-delivery',
         title: 'Quản lý giao hàng',
         url: '/deliveries',
-        roles: [],
+        roles: ['Admin', 'Leader', 'Manager', 'Deliver'],
       },
       {
         icon: 'mdi-image',
