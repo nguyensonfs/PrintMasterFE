@@ -91,27 +91,22 @@
     </v-col>
     <v-col>
       <v-card class="tw-p-2">
-        <v-card-title class="tw-pl-0 tw-text-[16px]"
-          >Thông tin dự án</v-card-title
-        >
+        <v-card-title class="tw-pl-0 tw-text-[16px]">Thông tin dự án</v-card-title>
         <v-img
           min-height="200px"
           width="200px"
           :src="`${FILE_URL}${approvedDesign.designImage}`"
         ></v-img>
         <v-card-text class="tw-flex tw-justify-between"
-          ><span>Giá dự án: </span
-          ><span>{{ project.startingPrice }}đ</span></v-card-text
+          ><span>Giá dự án: </span><span>{{ project.startingPrice }}đ</span></v-card-text
         >
         <v-card-text class="tw-flex tw-justify-between tw-pt-0"
-          ><span>Tên dự án: </span
-          ><span>{{ project.projectName }}</span></v-card-text
+          ><span>Tên dự án: </span><span>{{ project.projectName }}</span></v-card-text
         >
       </v-card>
       <v-card class="tw-p-2">
         <v-card-text class="tw-flex tw-justify-between"
-          ><span>Thành tiền: </span
-          ><span>{{ project.startingPrice }}đ</span></v-card-text
+          ><span>Thành tiền: </span><span>{{ project.startingPrice }}đ</span></v-card-text
         >
         <v-card-actions>
           <v-btn
@@ -133,83 +128,79 @@
   >
     {{ snackbar.message }}
     <template v-slot:actions>
-      <v-btn color="red" variant="text" @click="snackbar.visible = false">
-        Close
-      </v-btn>
+      <v-btn color="red" variant="text" @click="snackbar.visible = false"> Close </v-btn>
     </template>
   </v-snackbar>
 </template>
 <script setup>
-import { useProjectStore } from '@/stores/project'
-import { getResourcesByNameAPI } from '@/apis/resourceServices'
-import { createPrintJobsAPI } from '@/apis/printJobServices'
-import { useResourceStore } from '@/stores/resource'
-import { useProjectProcessStore } from '@/stores/projectProcess'
-import { useErrorHandler } from '@/mixins/errorMixin'
-import dayjs from 'dayjs'
-import { FILE_URL } from '@/constants'
+import { useProjectStore } from "@/stores/project";
+import { getResourcesByNameAPI } from "@/apis/resourceServices";
+import { createPrintJobsAPI } from "@/apis/printJobServices";
+import { useResourceStore } from "@/stores/resource";
+import { useProjectProcessStore } from "@/stores/projectProcess";
+import { useErrorHandler } from "@/mixins/errorMixin";
+import dayjs from "dayjs";
+import { FILE_URL } from "@/constants";
 
 const props = defineProps({
   projectId: String,
-})
+});
 
-const { handleApiError } = useErrorHandler()
+const { handleApiError } = useErrorHandler();
 
-const projectStore = useProjectStore()
-const resourceStore = useResourceStore()
-const projectProcess = useProjectProcessStore()
-const router = useRouter()
+const projectStore = useProjectStore();
+const resourceStore = useResourceStore();
+const projectProcess = useProjectProcessStore();
+const router = useRouter();
 
-const project = computed(() => projectStore.getProjectById(props.projectId))
-const designs = computed(() => projectStore.getProjectDesigns(props.projectId))
+const project = computed(() => projectStore.getProjectById(props.projectId));
+const designs = computed(() => projectStore.getProjectDesigns(props.projectId));
 const resourceDetails = computed(() => {
-  return resourceStore.getResourceDetails
-})
+  return resourceStore.getResourceDetails;
+});
 
-const selectedResourceId = ref(null)
-const resourceConsumable = ref([])
+const selectedResourceId = ref(null);
+const resourceConsumable = ref([]);
 
 const snackbar = ref({
   visible: false,
-  message: '',
-  color: 'error',
-})
+  message: "",
+  color: "error",
+});
 
-const showSnackbar = (message, color = 'error') => {
-  snackbar.value.message = message
-  snackbar.value.color = color
-  snackbar.value.visible = true
-}
+const showSnackbar = (message, color = "error") => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.visible = true;
+};
 
 const formatDate = (date) => {
-  return date ? dayjs(date).format('DD/MM/YYYY') : 'Không có ngày'
-}
+  return date ? dayjs(date).format("DD/MM/YYYY") : "Không có ngày";
+};
 
 const approvedDesign = computed(() => {
-  return designs.value.find(
-    (design) => design.designStatus === 'HasBeenApproved'
-  )
-})
+  return designs.value.find((design) => design.designStatus === "HasBeenApproved");
+});
 
 const getResourceConsumable = async (resourceName) => {
-  const response = await getResourcesByNameAPI(resourceName)
+  const response = await getResourcesByNameAPI(resourceName);
   if (response) {
     const filteredResources = response.filter(
       (resource) => resource.resourceName === resourceName
-    )
+    );
 
     resourceConsumable.value = filteredResources.flatMap((resource) =>
       resource.resourceProperties.flatMap((property) =>
         property.resourcePropertyDetails.map((detail) => ({
           ...detail,
-          quantity: 1,
+          quantity: 0,
         }))
       )
-    )
-    return resourceConsumable.value
+    );
+    return resourceConsumable.value;
   }
-  return []
-}
+  return [];
+};
 
 const sendPrintJob = async () => {
   try {
@@ -225,38 +216,38 @@ const sendPrintJob = async () => {
           quantity: 1,
         },
       ],
-    }
+    };
 
-    const response = await createPrintJobsAPI(requestData)
-    await projectStore.fetchAllProject()
+    const response = await createPrintJobsAPI(requestData);
+    await projectStore.fetchAllProject();
     if (response.status === 200) {
-      showSnackbar(response.message, 'success')
-      markStepAsCompleted(3)
-      router.push({ name: 'delivery', params: { projectId: props.projectId } })
-      projectProcess.setActiveStep(4)
+      showSnackbar(response.message, "success");
+      markStepAsCompleted(3);
+      router.push({ name: "delivery", params: { projectId: props.projectId } });
+      projectProcess.setActiveStep(4);
     }
   } catch (error) {
-    const errorMessage = handleApiError(error)
-    showSnackbar(errorMessage, 'error')
+    const errorMessage = handleApiError(error);
+    showSnackbar(errorMessage, "error");
   }
-}
+};
 
 const markStepAsCompleted = (stepId) => {
-  projectProcess.completeStep(stepId)
-}
+  projectProcess.completeStep(stepId);
+};
 
 const increaseQuantity = (index) => {
-  resourceConsumable.value[index].quantity++
-}
+  resourceConsumable.value[index].quantity++;
+};
 
 const decreaseQuantity = (index) => {
-  if (resourceConsumable.value[index].quantity > 1) {
-    resourceConsumable.value[index].quantity--
+  if (resourceConsumable.value[index].quantity > 0) {
+    resourceConsumable.value[index].quantity--;
   }
-}
+};
 
 onMounted(async () => {
-  await resourceStore.fetchResourceDetailsByName('Machinery')
-  getResourceConsumable('Office supplies')
-})
+  await resourceStore.fetchResourceDetailsByName("Machinery");
+  getResourceConsumable("Office supplies");
+});
 </script>
