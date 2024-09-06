@@ -5,6 +5,11 @@ export const getUserRoleManagerAPI = async () => {
   return response
 }
 
+export const getUserRoleDeliverAPI = async () => {
+  const response = await axios.get('/users/shippers')
+  return response
+}
+
 export const getUserRoleLeaderAPI = async () => {
   const response = await axios.get('/users/leaders')
   return response

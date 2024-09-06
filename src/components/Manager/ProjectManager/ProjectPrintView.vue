@@ -144,6 +144,8 @@ import { useProjectStore } from '@/stores/project'
 import { getResourcesByNameAPI } from '@/apis/resourceServices'
 import { createPrintJobsAPI } from '@/apis/printJobServices'
 import { useResourceStore } from '@/stores/resource'
+import { useProjectProcessStore } from '@/stores/projectProcess'
+import { useErrorHandler } from '@/mixins/errorMixin'
 import dayjs from 'dayjs'
 import { FILE_URL } from '@/constants'
 
@@ -151,8 +153,12 @@ const props = defineProps({
   projectId: String,
 })
 
+const { handleApiError } = useErrorHandler()
+
 const projectStore = useProjectStore()
 const resourceStore = useResourceStore()
+const projectProcess = useProjectProcessStore()
+const router = useRouter()
 
 const project = computed(() => projectStore.getProjectById(props.projectId))
 const designs = computed(() => projectStore.getProjectDesigns(props.projectId))
@@ -168,6 +174,12 @@ const snackbar = ref({
   message: '',
   color: 'error',
 })
+
+const showSnackbar = (message, color = 'error') => {
+  snackbar.value.message = message
+  snackbar.value.color = color
+  snackbar.value.visible = true
+}
 
 const formatDate = (date) => {
   return date ? dayjs(date).format('DD/MM/YYYY') : 'Không có ngày'
@@ -216,20 +228,21 @@ const sendPrintJob = async () => {
     }
 
     const response = await createPrintJobsAPI(requestData)
-
-    snackbar.value = {
-      visible: true,
-      message: response.message,
-      color: 'success',
+    await projectStore.fetchAllProject()
+    if (response.status === 200) {
+      showSnackbar(response.message, 'success')
+      markStepAsCompleted(3)
+      router.push({ name: 'delivery', params: { projectId: props.projectId } })
+      projectProcess.setActiveStep(4)
     }
   } catch (error) {
-    snackbar.value = {
-      visible: true,
-      message: 'Lỗi khi gửi công việc in.',
-      color: 'error',
-    }
-    console.error('Error posting print job:', error)
+    const errorMessage = handleApiError(error)
+    showSnackbar(errorMessage, 'error')
   }
+}
+
+const markStepAsCompleted = (stepId) => {
+  projectProcess.completeStep(stepId)
 }
 
 const increaseQuantity = (index) => {

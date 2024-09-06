@@ -9,7 +9,6 @@ export const getResourcesByNameAPI = async (resourceName) => {
     })
     return response
   } catch (error) {
-    console.log('🚀 ~ getResourcesByNameAPI ~ error:', error)
     throw error
   }
 }

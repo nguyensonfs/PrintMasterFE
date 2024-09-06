@@ -71,17 +71,20 @@
             v-for="(step, index) in steps"
             :key="step.id"
             :class="{
-              'tw-text-[#4caf50]': step.active,
-              'tw-text-[#0d31e0]': step.completed && !step.active,
+              'tw-text-[#4caf50]': step.active || formData?.progress === 100,
+              'tw-text-[#0d31e0]':
+                step.completed && !step.active && formData?.progress !== 100,
             }"
           >
             <v-btn
               class="tw-px-2 tw-py-1"
               :class="{
-                'tw-text-[#4caf50]': step.active,
-                'tw-text-[#0d31e0]': step.completed && !step.active,
+                'tw-text-[#4caf50]': step.active || formData?.progress === 100,
+                'tw-text-[#0d31e0]':
+                  step.completed && !step.active && formData?.progress !== 100,
               }"
               @click="handleStepClick(step.id)"
+              :disabled="formData?.progress === 100"
               tile
               flat
               text
@@ -93,17 +96,19 @@
                   :src="`${step.imgUrl}`"
                   class="tw-mx-auto"
                 ></v-img>
-
                 <span class="tw-m-auto tw-mt-1 tw-capitalize">{{
                   step.name
                 }}</span>
               </div>
             </v-btn>
+
+            <!-- Hiển thị icon mũi tên giữa các bước -->
             <v-icon
               class="tw-ml-2"
               :class="{
-                'tw-text-gray-400': !step.completed,
-                'tw-text-[#0d31e0]': step.completed && !step.active,
+                'tw-text-[#4caf50]': step.active || formData?.progress === 100,
+                'tw-text-[#0d31e0]':
+                  step.completed && !step.active && formData?.progress !== 100,
               }"
               v-if="index < steps.length - 1"
               icon="mdi-chevron-right"
@@ -111,6 +116,7 @@
           </v-col>
         </v-row>
       </v-container>
+
       <v-divider
         :thickness="2"
         class="border-opacity-75 tw-mt-3"
@@ -160,11 +166,15 @@ const snackbar = ref({
 })
 
 const handleProjectClick = (project) => {
+  formData.value = project
   projectProcess.setActiveStep(1)
   openDialog(project)
 }
 
 const handleStepClick = (stepId) => {
+  if (formData.value.progress === 100 && stepId !== steps.length) {
+    return
+  }
   projectProcess.setActiveStep(stepId)
   switch (stepId) {
     case 1:
@@ -194,7 +204,23 @@ const handleStepClick = (stepId) => {
 const openDialog = async (item = null) => {
   dialogVisible.value = true
   formData.value = item
-  router.push({ name: 'projectDetail', params: { projectId: item.id } })
+
+  if (formData.value.progress === 100) {
+    projectProcess.setActiveStep(steps.value.length)
+    router.push({
+      name: 'delivery',
+      params: { projectId: formData.value.id },
+    })
+  } else if (formData.value.progress === 25) {
+    projectProcess.setActiveStep(3)
+    router.push({
+      name: 'print',
+      params: { projectId: formData.value.id },
+    })
+  } else {
+    projectProcess.setActiveStep(1)
+    router.push({ name: 'projectDetail', params: { projectId: item.id } })
+  }
 }
 
 const closeDialog = async () => {

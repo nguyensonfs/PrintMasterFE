@@ -31,9 +31,15 @@ request.interceptors.response.use(
   (error) => {
     let res = {}
     if (error.response) {
-      res.data = error.response.data
-      res.status = error.response.status
-      res.headers = error.response.headers
+      if (error.response.data && error.response.data.data) {
+        res.data = error.response.data.data
+        res.status = error.response.data.status
+        res.headers = error.response.data.headers
+      } else {
+        res.data = error.response.data
+        res.status = error.response.status
+        res.headers = error.response.headers
+      }
     } else if (error.request) {
       res.message = 'Không nhận được phản hồi từ server.'
     } else {

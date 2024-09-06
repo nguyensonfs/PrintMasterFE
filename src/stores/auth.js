@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => state.isLoggedIn,
     getUser: (state) => state.user,
     getUserPermissions: (state) => state.user?.Permission || [],
+    isShipper: (state) => state.user?.Permission?.includes('Deliver'),
   },
   actions: {
     async login(credentials) {

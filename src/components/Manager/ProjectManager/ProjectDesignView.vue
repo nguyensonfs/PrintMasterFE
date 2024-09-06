@@ -121,6 +121,8 @@
 <script setup>
 import { useProjectStore } from "@/stores/project";
 import { useProjectProcessStore } from "@/stores/projectProcess";
+import { useErrorHandler } from "@/mixins/errorMixin";
+import * as projectService from "@/apis/projectServices";
 import { FILE_URL } from "@/constants";
 import dayjs from "dayjs";
 const props = defineProps({
@@ -131,6 +133,7 @@ const projectStore = useProjectStore();
 const project = computed(() => projectStore.getProjectById(props.projectId));
 const designs = computed(() => projectStore.getProjectDesigns(props.projectId));
 const router = useRouter();
+const { handleApiError } = useErrorHandler();
 
 const isOpen = ref(false);
 const designApproval = ref("");
@@ -144,6 +147,12 @@ const snackbar = ref({
   message: "",
   color: "error",
 });
+
+const showSnackbar = (message, color = "error") => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.visible = true;
+};
 
 const imageFile = ref(null);
 const selectedDesign = ref(null);
@@ -159,22 +168,18 @@ const createDesign = async () => {
   }
 
   try {
-    const response = await projectStore.createProjectDesign(props.projectId, formData);
+    const response = await projectService.createProjectDesignAPI(
+      props.projectId,
+      formData
+    );
 
     if (response.status === 200) {
-      snackbar.value = {
-        visible: true,
-        message: response.message,
-        color: "success",
-      };
+      showSnackbar(response.message, "success");
       designs.value.push(response.data);
     }
   } catch (error) {
-    snackbar.value = {
-      visible: true,
-      message: "Đã xảy ra lỗi trong quá trình tạo thiết kế.",
-      color: "error",
-    };
+    const errorMessage = handleApiError(error);
+    showSnackbar(errorMessage, "error");
   }
 };
 
@@ -194,18 +199,15 @@ const handleApproval = async () => {
   formData.append("designApproval", status);
 
   try {
-    const response = await projectStore.approveProjectDesign(
+    const response = await projectService.approvedProjectDesignAPI(
       props.projectId,
       selectedDesign.value,
       formData
     );
+    await projectStore.fetchAllProject();
 
     if (response.status === 200) {
-      snackbar.value = {
-        visible: true,
-        message: response.message,
-        color: "success",
-      };
+      showSnackbar(response.message, "success");
 
       designs.value.forEach((design) => {
         if (design.id === selectedDesign.value) {
@@ -222,11 +224,8 @@ const handleApproval = async () => {
       }
     }
   } catch (error) {
-    snackbar.value = {
-      visible: true,
-      message: "Đã xảy ra lỗi trong quá trình phê duyệt thiết kế.",
-      color: "error",
-    };
+    const errorMessage = handleApiError(error);
+    showSnackbar(errorMessage, "error");
   } finally {
     deselectDesign();
   }

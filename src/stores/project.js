@@ -1,9 +1,4 @@
-import {
-  createProjectAPI,
-  getAllProjectAPI,
-  createProjectDesignAPI,
-  approvedProjectDesignAPI,
-} from '@/apis/projectServices'
+import { createProjectAPI, getAllProjectAPI } from '@/apis/projectServices'
 import { defineStore } from 'pinia'
 export const useProjectStore = defineStore('project', {
   state: () => ({
@@ -37,26 +32,6 @@ export const useProjectStore = defineStore('project', {
     async createProject(data) {
       try {
         const response = await createProjectAPI(data)
-        return response
-      } catch (error) {
-        this.error = error
-      }
-    },
-    async createProjectDesign(id, data) {
-      try {
-        const response = await createProjectDesignAPI(id, data)
-        return response
-      } catch (error) {
-        this.error = error
-      }
-    },
-    async approveProjectDesign(projectId, designId, data) {
-      try {
-        const response = await approvedProjectDesignAPI(
-          projectId,
-          designId,
-          data
-        )
         return response
       } catch (error) {
         this.error = error
