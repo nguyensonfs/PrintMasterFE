@@ -25,10 +25,7 @@
               <td class="tw-text-center">
                 <v-btn
                   class="tw-capitalize"
-                  :disabled="
-                    delivery.find((item) => item.projectId === props.projectId)
-                      ?.deliveryStatus === 'Delivered'
-                  "
+                  :disabled="isDeliveryDisabled"
                   @click="openDialog"
                   size="small"
                   >Giao Hàng</v-btn
@@ -130,6 +127,7 @@ import { useErrorHandler } from "@/mixins/errorMixin";
 import * as userService from "@/apis/userServices";
 import * as shippingService from "@/apis/shippingServices";
 import * as deliveriService from "@/apis/deliveryServices";
+import { computed } from "vue";
 
 const projectStore = useProjectStore();
 const { handleApiError } = useErrorHandler();
@@ -143,7 +141,7 @@ const shippers = ref([]);
 const deliveryDate = ref(null);
 const selectedShipper = ref(null);
 const selectedShippingMethod = ref(null);
-const delivery = ref(null);
+const data = ref([]);
 
 const project = computed(() => projectStore.getProjectById(props.projectId));
 
@@ -196,18 +194,22 @@ const getShippers = async () => {
   shippers.value = response;
 };
 
-const getDeliveryById = async () => {
-  const response = await deliveriService.getDeliveryByProjectIdAPI(props.projectId);
-  delivery.value = response;
-};
+const deliveryItem = ref(null);
 
-const deliveryItem = computed(() =>
-  delivery.value.find((item) => item.projectId === props.projectId)
-);
+watchEffect(() => {
+  if (Array.isArray(data.value)) {
+    deliveryItem.value = data.value.find((item) => item.project.id === props.projectId);
+  }
+});
 
 const isDeliveryDisabled = computed(
   () => deliveryItem.value?.deliveryStatus === "Delivered"
 );
+
+const getDeliveryById = async () => {
+  const response = await deliveriService.getDeliveryByProjectIdAPI(props.projectId);
+  data.value = response;
+};
 
 const getShippingMethod = async () => {
   const response = await shippingService.getshippingMethodAPI();
